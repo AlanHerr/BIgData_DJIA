@@ -1,217 +1,163 @@
-# 🏆 World Cup Matches Data Analytics
+# ETL: stock_senti_analysis (DJIA Sentiment)
 
-## 📖 Descripción del Proyecto
+Proyecto: pipeline ETL en Python para el dataset "stock_senti_analysis.csv" (sentiment analysis for Dow Jones DJIA stock).
 
-Este proyecto implementa un **pipeline ETL (Extract, Transform, Load)** completo para el análisis de datos de partidos de la Copa del Mundo. El sistema procesa datos históricos de los encuentros, limpia y transforma la información para facilitar el análisis posterior y la creación de visualizaciones y dashboards analíticos.
+Este repositorio contiene un pipeline modular (Extract / Transform / Load / Visualization) que lee un CSV con titulares (Top1..Top25) y una etiqueta binaria (`Label`) que indica si el DJIA subió o bajó en el cierre diario. El pipeline limpia y transforma los datos, guarda un CSV limpio y una base de datos SQLite y genera varias visualizaciones EDA.
 
-## 🎯 Objetivos
+---
 
-- **Procesamiento de datos**: Limpiar y estandarizar datos de partidos de fútbol
-- **Pipeline ETL**: Implementar una arquitectura modular y escalable
-- **Múltiples formatos**: Generar salidas en CSV y SQLite
-- **Calidad de datos**: Garantizar integridad y consistencia de la información
-- **Análisis preparado**: Datos listos para visualización y análisis avanzado
+Tabla de contenidos
 
-## 🏗️ Arquitectura del Proyecto
+- Estructura del proyecto
+- Requisitos e instalación
+- Ejecución
+- Variables de entorno / Config
+- Artefactos generados
+- Notas sobre el dataset
+- Buenas prácticas y pruebas mínimas
+- Autor
+
+---
+
+## Estructura del proyecto
 
 ```
-📁 Uber-Data-Analytics-Dashboard/
-├── 📁 Config/                    # Configuraciones centralizadas
-│   ├── __init__.py              # Inicializador del paquete
-│   └── config.py                # Variables de configuración
-├── 📁 Extract/                  # Módulo de extracción de datos
-│   ├── files/                   # Archivos de datos
-│   │   ├── WorldCupMatches.csv            # Dataset original
-│   │   ├── WorldCupMatches_cleaned.csv    # Dataset procesado
-│   │   └── WorldCupMatches.db             # Base de datos SQLite
-│   └── Worl_Cup_Matches_Extract.py
-├── 📁 Transform/                # Módulo de transformación
-│   └── Worl_Cup_Matches_Transform.py
-├── 📁 Load/                     # Módulo de carga
-│   └── Worl_Cup_Matches_Load.py
-├── 📄 main.py                   # Archivo principal de ejecución
-├── 📄 requirements.txt          # Dependencias del proyecto
-├── 📄 README.md                 # Documentación
-└── 📄 .gitignore               # Archivos excluidos de Git
+BIgData_DJIA/
+├── Config/
+│   └── config.py                # Rutas de entrada/salida
+├── Extract/
+│   ├── Stock_Senti_Extract.py   # Lector CSV
+│   └── files/
+│       ├── stock_senti_analysis.csv
+│       ├── stock_senti_analysis_cleaned.csv (generado)
+│       └── stock_senti_analysis.db (generado)
+├── Transform/
+│   └── Stock_Senti_Transform.py  # Limpieza y transformaciones
+├── Load/
+│   └── Stock_Senti_Load.py       # Guardado CSV y SQLite
+├── Visualization/
+│   └── stock_visualization.py    # Genera gráficas y las guarda en Visualization/images/
+├── main_stock.py                 # Orquestador ETL para stock_senti_analysis
+├── requirements.txt
+└── README.md
 ```
 
-## 🛠️ Tecnologías Utilizadas
+---
 
-| Tecnología | Versión | Propósito |
-|------------|---------|-----------|
-| **Python** | 3.12+ | Lenguaje principal |
-| **Pandas** | 2.3.2 | Manipulación y análisis de datos |
-| **NumPy** | 2.3.2 | Cálculos numéricos |
-| **SQLite3** | Built-in | Base de datos local |
-| **Matplotlib** | Latest | Visualización de datos |
-| **Seaborn** | Latest | Visualización estadística |
+## Requisitos e instalación
 
-## 📊 Estructura de Datos
+Requiere Python 3.8+ (se recomienda 3.10+). Instala dependencias desde `requirements.txt`.
 
-### Dataset de Entrada (`WorldCupMatches.csv`)
-
-**Información de partidos de la Copa del Mundo con columnas principales:**
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `Year` | Date | Año del partido |
-| `Datetime` | DateTime | Fecha y hora del partido |
-| `Stage` | String | Fase del torneo |
-| `Stadium` | String | Estadio donde se jugó |
-| `City` | String | Ciudad sede |
-| `Home Team Name` | String | Nombre del equipo local |
-| `Home Team Goals` | Int | Goles del equipo local |
-| `Away Team Name` | String | Nombre del equipo visitante |
-| `Away Team Goals` | Int | Goles del equipo visitante |
-| `Attendance` | Int | Asistencia al partido |
-| `Half-time Home Goals` | Int | Goles del equipo local al medio tiempo |
-| `Half-time Away Goals` | Int | Goles del equipo visitante al medio tiempo |
-| `RoundID` | Int | Identificador de la ronda |
-| `MatchID` | Int | Identificador del partido |
-| ...otras columnas relevantes... |
-
-### Dataset de Salida (`WorldCupMatches_cleaned.csv`)
-
-**Dataset procesado con mejoras:**
-- ✅ **Nueva columna `Formatted_Datetime`**: Fecha y hora en formato legible
-- ✅ **Valores nulos manejados**: Estrategias diferenciadas por tipo
-- ✅ **Tipos de datos correctos**: Fechas, números normalizados
-- ✅ **Consistencia**: Datos estandarizados para análisis
-
-## 🔧 Funcionalidades del Pipeline ETL
-
-### 🔍 Extract (`WorlCupMatchesExtractor`)
-
-**Responsabilidades:**
-- Carga de datos desde CSV
-- Validación inicial de estructura
-
-**Métodos principales:**
-- `__init__(csv_path, output_path)`: Inicialización con rutas
-- `queries()`: Proceso de extracción
-- `response()`: Vista previa de los datos
-
-### 🔄 Transform (`WorlCupMatchesTransformer`)
-
-**Responsabilidades:**
-- Transformación de tipos de datos
-- Creación de nuevas columnas derivadas
-- Normalización de valores
-
-**Procesos de transformación:**
-1. **Fechas y horas**: Conversión a datetime y creación de columna formateada
-2. **Valores nulos**: Estrategias diferenciadas por tipo
-3. **Tipos de datos**: Normalización de numéricos
-4. **Outliers**: Cálculo de límites para análisis estadístico
-
-### 📥 Load (`WorlCupMatchesLoader`)
-
-**Responsabilidades:**
-- Persistencia de datos procesados
-- Múltiples formatos de salida
-- Manejo de errores en escritura
-
-**Métodos de carga:**
-- `load_data()`: Guardar en CSV
-- `to_csv(path)`: Guardar CSV personalizado
-- `to_sqlite(db_path, table_name)`: Guardar en SQLite
-
-## 🚀 Instalación y Uso
-
-### Prerrequisitos
 ```bash
-Python 3.12+
-pip (gestor de paquetes)
-venv (entornos virtuales)
-```
+# Crear y activar un entorno virtual (opcional pero recomendado)
+python3 -m venv .venv
+source .venv/bin/activate
 
-### Instalación Paso a Paso
-
-1. **Clonar el repositorio**:
-```bash
-https://github.com/AlanHerr/ETL_Actividad.git
-```
-
-2. **Crear y activar entorno virtual**:
-```bash
-# Crear entorno virtual
-python -m venv 
-
-# Activar entorno virtual
-# En Linux/Mac:
-source uber_env/bin/activate
-# En Windows:
-uber_env\Scripts\activate
-```
-
-3. **Instalar dependencias**:
-```bash
+# Instalar dependencias
 pip install -r requirements.txt
 ```
 
-### Ejecución
+---
+
+## Ejecución
+
+Ejecuta el pipeline ETL para `stock_senti_analysis`:
 
 ```bash
-python main.py
+python main_stock.py
 ```
 
-**Salida esperada:**
-```
-Datos guardados en la base de datos SQLite: Extract/files/WorldCupMatches.db, tabla: worldcup_matches
-ETL proceso completado exitosamente.
-```
+Salida esperada (artefactos generados):
+- `Extract/files/stock_senti_analysis_cleaned.csv` (CSV limpio)
+- `Extract/files/stock_senti_analysis.db` (SQLite, tabla `stock_senti`)
+- Imágenes en `Visualization/images/`:
+	- `count_label.png`
+	- `yearly_freq.png`
+	- `heatmap_year_month.png`
+	- `month_bar_plot.png`
+	- `weekday_bar_plot.png`
 
-## 📝 Configuración
+---
 
-### Archivo `Config/config.py`
+## Variables de configuración
+
+Rutas de entrada/salida están en `Config/config.py`:
 
 ```python
-# Rutas de archivos
-input_file = "Extract/files/WorldCupMatches.csv"
-output_file = "Extract/files/WorldCupMatches_cleaned.csv"
-# Configuraciones adicionales pueden agregarse aquí
+input_file = "Extract/files/stock_senti_analysis.csv"
+output_file = "Extract/files/stock_senti_analysis_cleaned.csv"
 ```
 
+Modifica esas rutas si mueves archivos o quieres cambiar el nombre de salida.
+
+---
+
+## Notas sobre el dataset
+
+- Columnas principales:
+	- `Date` (fecha)
+	- `Label` (0/1) — 1 indica que el DJIA subió respecto al cierre del día anterior; 0 indica que bajó.
+	- `Top1`..`Top25` — titulares o fragments de noticias (texto) por fila.
+- Rango temporal: el CSV contiene registros históricos (la muestra empieza en 2000 en el archivo incluido).
+- Tamaño: alrededor de 6000+ filas (ver `wc -l Extract/files/stock_senti_analysis.csv`).
+
+---
+
+## Qué hace cada módulo
+
+- `Extract/Stock_Senti_Extract.py`:
+	- Lee el CSV con `pd.read_csv(..., encoding='ISO-8859-1')` y devuelve DataFrame.
+
+- `Transform/Stock_Senti_Transform.py`:
+	- Convierte `Date` a datetime.
+	- Normaliza `Label` a int y lo valida (drop de nulos en `Label`).
+	- Crea `Label_text` ("DJIA subió" / "DJIA bajó").
+	- Extrae `year`, `month`, `weekday`.
+	- Elimina filas con `Date` nulo.
+
+- `Load/Stock_Senti_Load.py`:
+	- Guarda CSV limpio y exporta a SQLite (`Extract/files/stock_senti_analysis.db`) con tabla `stock_senti`.
+
+- `Visualization/stock_visualization.py`:
+	- Genera y guarda las 5 gráficas EDA en `Visualization/images/`.
+
+- `main_stock.py`:
+	- Orquesta extract -> transform -> load -> visualize.
+
+---
 
 
-## 📈 Resultados y Métricas
+## Autor
+AlanHerr
 
-### Antes del Procesamiento
-- ❌ Fechas y horas en formatos mixtos
-- ❌ Valores nulos y datos faltantes en goles, asistencia y otros campos
-- ❌ Tipos de datos inconsistentes (números como texto, fechas como string)
-- ❌ Registros duplicados
-- ❌ Sin columna de fecha/hora formateada
+---
 
-### Después del Procesamiento
-- ✅ Columna `Formatted_Datetime` con fecha y hora legible
-- ✅ Valores nulos manejados y normalizados en columnas numéricas y de texto
-- ✅ Tipos de datos consistentes: fechas, enteros, strings
-- ✅ Registros duplicados eliminados
-- ✅ Límites de outliers calculados para análisis estadístico
-- ✅ Datos listos para visualización y análisis avanzado
+## Interpretación rápida de las gráficas
 
-### Archivos Generados
+A continuación se ofrecen breves captions para cada una de las imágenes generadas en `Visualization/images/`. Puedes copiarlas directamente en informes o presentaciones.
 
-| Archivo | Tamaño | Formato | Propósito |
-|---------|--------|---------|-----------|
-| `WorldCupMatches.csv` | ~25MB | CSV | Dataset original |
-| `WorldCupMatches_cleaned.csv` | ~28MB | CSV | Dataset procesado y limpio |
-| `WorldCupMatches.db` | ~31MB | SQLite | Base de datos para consultas |
+1) `count_label.png` — Distribución de la etiqueta (Label)
+- Qué muestra: barras con el conteo de días etiquetados como 0 (DJIA bajó) y 1 (DJIA subió).
+- Cómo interpretarlo: permite ver si la clase 0/1 está balanceada o existe sesgo. Si una clase domina, los modelos deberán manejar desbalance (re-muestreo, pesos, métricas robustas).
+- Utilidad práctica: guía la elección de métricas (por ejemplo, F1 en lugar de accuracy) y decisiones de muestreo o regularización.
 
-### Convenciones de Commits
-- `feat:` Nueva funcionalidad
-- `fix:` Corrección de bugs
-- `docs:` Documentación
-- `style:` Formato de código
-- `refactor:` Refactorización
-- `test:` Tests
+2) `yearly_freq.png` — Frecuencia anual de días con Label=1 (porcentaje)
+- Qué muestra: evolución año a año del porcentaje de días en los que el DJIA subió.
+- Cómo interpretarlo: identifica periodos con mayor o menor probabilidad de subidas (picos y valles) y posibles cambios de régimen económico. Útil para analizar drift temporal.
+- Utilidad práctica: si la distribución cambia con el tiempo, los modelos deberían validar por año (time-based split) y considerar features temporales o reentrenamiento frecuente.
 
-## 📄 Licencia
+3) `heatmap_year_month.png` — Heatmap año vs mes (porcentaje de Label=1)
+- Qué muestra: mapa de calor que combina año (eje y) y mes (eje x), con el color representando el porcentaje de días con Label=1.
+- Cómo interpretarlo: revela patrones estacionales dentro de cada año y años atípicos (por ejemplo, meses consistentemente alcistas o bajistas). Identifica estacionalidad y excepciones puntuales.
+- Utilidad práctica: sugiere incluir variables estacionales (mes, trimestre) en el modelo y evaluar si ciertos meses tienen mayor predictive power.
 
-Este proyecto está bajo la licencia MIT. Ver archivo [LICENSE](LICENSE) para más detalles.
+4) `month_bar_plot.png` — Porcentaje promedio por mes (agregado sobre todos los años)
+- Qué muestra: barras ordenadas con el promedio del porcentaje de días alcistas por mes (enero a diciembre).
+- Cómo interpretarlo: facilita ver la estacionalidad promedio (meses con mayor propensión a subidas). Comparar con el heatmap ayuda a distinguir patrones consistentes de outliers.
+- Utilidad práctica: si hay meses con comportamiento marcado, crear features categóricas/encodings para mes puede mejorar rendimiento.
 
-## 👨‍💻 Autor
+5) `weekday_bar_plot.png` — Porcentaje promedio por día de la semana
+- Qué muestra: barras con el porcentaje promedio de días alcistas por día de la semana (lunes–viernes).
+- Cómo interpretarlo: detecta efectos de día de la semana (por ejemplo, los lunes pueden ser más volátiles). Útil para detectar sesgos operativos o ventanas de negociación.
+- Utilidad práctica: incluir día de la semana en el modelo o diseñar reglas de negocio (backtesting por día) puede mejorar interpretabilidad.
 
-**Alan Herrera** 
-- GitHub: [@AlanHerr](https://github.com/AlanHerr)
