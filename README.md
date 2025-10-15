@@ -127,11 +127,6 @@ Modifica esas rutas si mueves archivos o quieres cambiar el nombre de salida.
 ---
 
 
-## Autor
-AlanHerr
-
----
-
 ## Interpretación rápida de las gráficas
 
 A continuación se ofrecen breves captions para cada una de las imágenes generadas en `Visualization/images/`. Puedes copiarlas directamente en informes o presentaciones.
@@ -161,3 +156,9 @@ A continuación se ofrecen breves captions para cada una de las imágenes genera
 - Cómo interpretarlo: detecta efectos de día de la semana (por ejemplo, los lunes pueden ser más volátiles). Útil para detectar sesgos operativos o ventanas de negociación.
 - Utilidad práctica: incluir día de la semana en el modelo o diseñar reglas de negocio (backtesting por día) puede mejorar interpretabilidad.
 
+
+
+## Autor
+AlanHerr
+
+---
